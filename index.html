@@ -3,35 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Sitio Web | Jafet Levi</title>
+    <title>LEVI DOBLE FILO | Fachada 3D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            text-align: center;
+        :root { --oro: #d4af37; --negro: #000; }
+        body, html { margin: 0; padding: 0; height: 100vh; background: #000; overflow: hidden; font-family: 'Montserrat', sans-serif; }
+
+        /* Contenedor 3D */
+        .escenario-3d {
+            perspective: 1200px;
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3rem;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+        /* La Fachada (Tu imagen descarga.png) */
+        .salon-real {
+            position: relative;
+            width: 115%; height: 115%;
+            background-image: url('descarga.png');
+            background-size: cover; background-position: center;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        h1 { margin-top: 0; font-size: 2.5rem; }
-        p { font-size: 1.2rem; opacity: 0.9; }
+
+        /* Capa de atmósfera exterior */
+        .salon-real::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+        }
+
+        /* Interfaz que flota en la calle */
+        .interfaz-entrada {
+            position: relative; z-index: 10;
+            transform: translateZ(150px); text-align: center;
+            transition: 1s;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif; color: var(--oro);
+            font-size: clamp(2rem, 10vw, 4.5rem);
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+            margin: 0; letter-spacing: 12px;
+        }
+
+        .boton-acceso {
+            margin-top: 50px; padding: 18px 50px;
+            background: rgba(0,0,0,0.7); border: 2px solid var(--oro);
+            color: var(--oro); font-weight: 600;
+            cursor: pointer; letter-spacing: 4px;
+            transition: 0.5s; text-transform: uppercase;
+            backdrop-filter: blur(5px);
+        }
+
+        .boton-acceso:hover {
+            background: var(--oro); color: black;
+            box-shadow: 0 0 50px var(--oro);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 ¡Hola, Mundo!</h1>
-        <p>Soy Jafet Levi y esta es mi primera página oficial en GitHub.</p>
+
+    <audio id="audioCalle" loop>
+        <source src="https://www.soundjay.com/ambient/sounds/street-ambiance-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audioPuerta">
+        <source src="https://www.soundjay.com/door/sounds/door-open-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="escenario-3d" id="escena">
+        <div class="salon-real" id="salon">
+            <div class="interfaz-entrada">
+                <h1>LEVI DOBLE FILO</h1>
+                <p style="color:white; letter-spacing: 6px; font-weight: 300;">INGENIERÍA CAPILAR • ESTUDIO 2026</p>
+                <button class="boton-acceso" onclick="iniciar()">Entrar al Estudio</button>
+            </div>
+        </div>
     </div>
+
+    <script>
+        const salon = document.getElementById('salon');
+        const escena = document.getElementById('escena');
+        const calle = document.getElementById('audioCalle');
+        const puerta = document.getElementById('audioPuerta');
+        const synth = window.speechSynthesis;
+
+        // Efecto 3D: La cámara sigue tu mirada en la calle
+        escena.addEventListener('mousemove', (e) => {
+            const rotX = (window.innerHeight / 2 - e.pageY) / 35;
+            const rotY = (window.innerWidth / 2 - e.pageX) / 35;
+            salon.style.transform = `rotateX(${rotX}deg) rotateY(${-rotY}deg)`;
+        });
+
+        // Al primer toque, se escucha la calle y habla el asistente
+        document.body.addEventListener('click', () => {
+            calle.play();
+            calle.volume = 0.4; 
+            hablar("Bienvenido. Estás frente a Levi Doble Filo. Ingeniería capilar en el corazón de la ciudad.");
+        }, { once: true });
+
+        function hablar(texto) {
+            synth.cancel();
+            const msg = new SpeechSynthesisUtterance(texto);
+            msg.lang = 'es-MX';
+            msg.rate = 0.85; 
+            msg.pitch = 0.7;
+            synth.speak(msg);
+        }
+
+        function iniciar() {
+            // Cambio de sonido: de calle a puerta
+            calle.pause();
+            puerta.play();
+            
+            hablar("Entrando al estudio.");
+
+            // Animación de "Caminar hacia adentro"
+            salon.style.transition = "2.5s cubic-bezier(0.4, 0, 0.2, 1)";
+            salon.style.transform = "translateZ(1000px) scale(3)";
+            document.querySelector('.interfaz-entrada').style.opacity = "0";
+            
+            setTimeout(() => {
+                window.location.href = 'blog.html';
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
